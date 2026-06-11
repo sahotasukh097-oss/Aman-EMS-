@@ -1,0 +1,171 @@
+@model Aman_EMS_.Controllers.LoginViewModel
+@{
+    ViewData["Title"] = "Login - AMAN HR Management";
+}
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div style="margin-bottom: 20px;">
+                <img src="~/images/aman-hr-logo.svg" alt="AMAN Logo" style="width: 80px; height: 80px;">
+            </div>
+            <h1>AMAN HR Management</h1>
+            <p>Employee Management System</p>
+        </div>
+
+        <form method="post" class="login-form">
+            <div class="form-group">
+                <label for="Email">Email Address</label>
+                <input type="email" id="Email" name="Email" class="form-control" 
+                       placeholder="Enter your email" required asp-for="Email">
+                <span class="text-danger" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="Password">Password</label>
+                <input type="password" id="Password" name="Password" class="form-control" 
+                       placeholder="Enter your password" required asp-for="Password">
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="RememberMe" name="RememberMe" class="form-check-input" 
+                       asp-for="RememberMe">
+                <label class="form-check-label" for="RememberMe">Remember me</label>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert-danger">
+                    @foreach (var modelState in ViewData.ModelState.Values)
+                    {
+                        @foreach (var error in modelState.Errors)
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    }
+                </div>
+            }
+
+            <button type="submit" class="btn-login">Login</button>
+
+            <div class="login-footer">
+                <p>Don't have an account? <a asp-action="Signup">Sign up here</a></p>
+            </div>
+        </form>
+
+        <div class="demo-credentials">
+            <h5>🔓 Demo Credentials</h5>
+            <p><strong>Email:</strong> admin@aman.com</p>
+            <p><strong>Password:</strong> 123456</p>
+        </div>
+    </div>
+</div>
+        margin-bottom: 20px;
+    }
+
+    .login-form label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .login-form .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+
+    .login-form .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-check {
+        margin-bottom: 20px;
+    }
+
+    .form-check-input {
+        margin-right: 8px;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .login-footer a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .demo-credentials {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 13px;
+    }
+
+    .demo-credentials h5 {
+        margin-top: 0;
+        color: #667eea;
+    }
+
+    .demo-credentials p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    .alert {
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-danger ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 12px;
+        display: block;
+        margin-top: 5px;
+    }
+</style>

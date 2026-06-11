@@ -1,0 +1,770 @@
+@{
+    ViewData["Title"] = "Payroll Management - AMAN HR";
+}
+
+<!-- Navigation Bar -->
+<nav class="dashboard-navbar">
+    <div class="navbar-left">
+        <a href="/Auth/Dashboard" class="navbar-logo">
+            <i class="fas fa-circle-notch"></i> AMAN HR
+        </a>
+        <div class="navbar-links">
+            <a href="/Auth/Dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/Auth/Employees" class="nav-link">
+                <i class="fas fa-users"></i> Employees
+            </a>
+            <a href="/Auth/Attendance" class="nav-link">
+                <i class="fas fa-calendar-check"></i> Attendance
+            </a>
+            <a href="/Auth/Leaves" class="nav-link">
+                <i class="fas fa-calendar-alt"></i> Leaves
+            </a>
+            <a href="/Auth/Payroll" class="nav-link active">
+                <i class="fas fa-money-bill"></i> Payroll
+            </a>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="payroll-page">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-money-bill"></i>
+            </div>
+            <div class="header-text">
+                <h1>Payroll Management</h1>
+                <p>Review payroll salaries and manage pay run with confidence.</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="generatePayroll()">
+            <i class="fas fa-plus"></i> Generate Payroll
+        </button>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <label>Month</label>
+            <select id="monthFilter" class="form-control">
+                <option value="">Select Month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Year</label>
+            <select id="yearFilter" class="form-control">
+                <option value="">Select Year</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Department</label>
+            <select id="departmentFilter" class="form-control">
+                <option value="">All Departments</option>
+                <option value="HR">HR</option>
+                <option value="IT">IT</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Sales">Sales</option>
+            </select>
+        </div>
+        <button class="btn-filter" onclick="applyPayrollFilters()">
+            <i class="fas fa-search"></i> Filter
+        </button>
+    </div>
+
+    <!-- Payroll Summary Stats -->
+    <div class="payroll-stats">
+        <div class="stat-item">
+            <div class="stat-label">Total Payroll</div>
+            <div class="stat-value" id="totalPayroll">$0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Total Allowances</div>
+            <div class="stat-value" id="totalAllowances">$0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Total Deductions</div>
+            <div class="stat-value" id="totalDeductions">$0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Employees Processed</div>
+            <div class="stat-value" id="employeesProcessed">0</div>
+        </div>
+    </div>
+
+    <!-- Payroll Table -->
+    <div class="table-wrapper">
+        <table class="payroll-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-user"></i> Employee</th>
+                    <th><i class="fas fa-dollar-sign"></i> Basic Salary</th>
+                    <th><i class="fas fa-plus"></i> Allowances</th>
+                    <th><i class="fas fa-minus"></i> Deductions</th>
+                    <th><i class="fas fa-money-bill"></i> Net Salary</th>
+                    <th><i class="fas fa-calendar"></i> Pay Date</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody id="payrollTableBody">
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Loading payroll data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Generate Payroll Modal -->
+<div id="payrollModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePayrollModal()">&times;</span>
+        <h2>Generate Payroll</h2>
+        <form id="payrollForm" onsubmit="savePayroll(event)">
+            <div class="form-group">
+                <label for="payMonth">Month</label>
+                <select id="payMonth" required>
+                    <option value="">Select Month</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="payYear">Year</label>
+                <select id="payYear" required>
+                    <option value="">Select Year</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="payDate">Payment Date</label>
+                <input type="date" id="payDate" required>
+            </div>
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" required>
+                    <option value="">All Departments</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Sales">Sales</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Generate Payroll</button>
+        </form>
+    </div>
+</div>
+
+<!-- Payroll Details Modal -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDetailsModal()">&times;</span>
+        <h2>Payroll Details</h2>
+        <div id="payrollDetails"></div>
+        <div class="detail-actions">
+            <button class="btn-print" onclick="printPayslip()">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button class="btn-download" onclick="downloadPayslip()">
+                <i class="fas fa-download"></i> Download
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-navbar {
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(74, 158, 255, 0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar-logo {
+    color: #4a9eff;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 0;
+}
+
+.nav-link {
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.nav-link.active {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.2);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-logout {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-logout:hover {
+    background: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.payroll-page {
+    padding: 20px;
+    color: #ffffff;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-icon {
+    font-size: 48px;
+    color: #4a9eff;
+}
+
+.header-text h1 {
+    font-size: 32px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.header-text p {
+    margin: 5px 0 0 0;
+    color: #9ca3af;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+
+.filters-section {
+    background: rgba(20, 30, 50, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #d1d5db;
+}
+
+.form-control {
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-filter {
+    background: #4a9eff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #0066cc;
+}
+
+.payroll-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: rgba(20, 30, 50, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-label {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4a9eff;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+}
+
+.payroll-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(20, 30, 50, 0.5);
+}
+
+.payroll-table thead {
+    background: rgba(30, 40, 60, 0.8);
+    border-bottom: 2px solid rgba(74, 158, 255, 0.3);
+}
+
+.payroll-table th {
+    padding: 15px;
+    text-align: left;
+    color: #9ca3af;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.payroll-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(74, 158, 255, 0.1);
+}
+
+.payroll-table tbody tr:hover {
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.btn-view {
+    background: rgba(74, 158, 255, 0.2);
+    color: #4a9eff;
+}
+
+.btn-view:hover {
+    background: rgba(74, 158, 255, 0.4);
+}
+
+.btn-print {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.btn-print:hover {
+    background: rgba(99, 102, 241, 0.4);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #9ca3af;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #9ca3af;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: white;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #4a9eff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+
+.detail-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-print,
+.btn-download {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    background: rgba(74, 158, 255, 0.1);
+    color: #4a9eff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-print:hover,
+.btn-download:hover {
+    background: rgba(74, 158, 255, 0.2);
+}
+
+.payroll-details {
+    background: rgba(30, 40, 60, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(74, 158, 255, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #9ca3af;
+}
+
+.detail-value {
+    color: #ffffff;
+    font-weight: 600;
+}
+</style>
+
+<script>
+let currentMonth = new Date().toLocaleString('default', { month: 'long' });
+let currentYear = new Date().getFullYear().toString();
+
+function generatePayroll() {
+    document.getElementById("payrollModal").style.display = "block";
+}
+
+function closePayrollModal() {
+    document.getElementById("payrollModal").style.display = "none";
+}
+
+function closeDetailsModal() {
+    document.getElementById("detailsModal").style.display = "none";
+}
+
+function applyPayrollFilters() {
+    const month = document.getElementById('monthFilter').value;
+    const year = document.getElementById('yearFilter').value;
+    
+    if (month && year) {
+        loadPayroll(month, year);
+    }
+}
+
+function savePayroll(event) {
+    event.preventDefault();
+    alert("Payroll generation functionality to be implemented");
+    closePayrollModal();
+}
+
+function printPayslip() {
+    window.print();
+}
+
+function downloadPayslip() {
+    alert("Download functionality to be implemented");
+}
+
+function loadPayroll(month = null, year = null) {
+    const queryMonth = month || currentMonth;
+    const queryYear = year || currentYear;
+    
+    fetch(`/api/payroll?month=${queryMonth}&year=${queryYear}`)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('payrollTableBody');
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No payroll records found</td></tr>';
+                resetPayrollStats();
+                return;
+            }
+            
+            let totalPayroll = 0;
+            let totalAllowances = 0;
+            let totalDeductions = 0;
+            
+            data.forEach(payroll => {
+                const row = document.createElement('tr');
+                totalPayroll += payroll.netSalary || 0;
+                totalAllowances += payroll.allowances || 0;
+                totalDeductions += payroll.deductions || 0;
+                
+                row.innerHTML = `
+                    <td>${payroll.employeeName}</td>
+                    <td>$${(payroll.basicSalary || 0).toLocaleString()}</td>
+                    <td>$${(payroll.allowances || 0).toLocaleString()}</td>
+                    <td>$${(payroll.deductions || 0).toLocaleString()}</td>
+                    <td>$${(payroll.netSalary || 0).toLocaleString()}</td>
+                    <td>${payroll.month} ${payroll.year}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-view" onclick="viewPayrollDetails(${payroll.id})"><i class="fas fa-eye"></i> View</button>
+                            <button class="btn-action btn-print" onclick="printPayslip()"><i class="fas fa-print"></i> Print</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            document.getElementById('totalPayroll').textContent = '$' + totalPayroll.toLocaleString();
+            document.getElementById('totalAllowances').textContent = '$' + totalAllowances.toLocaleString();
+            document.getElementById('totalDeductions').textContent = '$' + totalDeductions.toLocaleString();
+            document.getElementById('employeesProcessed').textContent = data.length;
+        })
+        .catch(error => console.error('Error loading payroll:', error));
+}
+
+function resetPayrollStats() {
+    document.getElementById('totalPayroll').textContent = '$0';
+    document.getElementById('totalAllowances').textContent = '$0';
+    document.getElementById('totalDeductions').textContent = '$0';
+    document.getElementById('employeesProcessed').textContent = '0';
+}
+
+function viewPayrollDetails(payrollId) {
+    document.getElementById("detailsModal").style.display = "block";
+}
+
+window.addEventListener('load', () => {
+    loadPayroll();
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const payrollModal = document.getElementById("payrollModal");
+    const detailsModal = document.getElementById("detailsModal");
+    
+    if (event.target == payrollModal) {
+        payrollModal.style.display = "none";
+    }
+    if (event.target == detailsModal) {
+        detailsModal.style.display = "none";
+    }
+}
+</script>

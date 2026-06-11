@@ -1,0 +1,643 @@
+@{
+    ViewData["Title"] = "Attendance Management - AMAN HR";
+}
+
+<!-- Navigation Bar -->
+<nav class="dashboard-navbar">
+    <div class="navbar-left">
+        <a href="/Auth/Dashboard" class="navbar-logo">
+            <i class="fas fa-circle-notch"></i> AMAN HR
+        </a>
+        <div class="navbar-links">
+            <a href="/Auth/Dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/Auth/Employees" class="nav-link">
+                <i class="fas fa-users"></i> Employees
+            </a>
+            <a href="/Auth/Attendance" class="nav-link active">
+                <i class="fas fa-calendar-check"></i> Attendance
+            </a>
+            <a href="/Auth/Leaves" class="nav-link">
+                <i class="fas fa-calendar-alt"></i> Leaves
+            </a>
+            <a href="/Auth/Payroll" class="nav-link">
+                <i class="fas fa-money-bill"></i> Payroll
+            </a>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="attendance-page">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="header-text">
+                <h1>Attendance Management</h1>
+                <p>Track employee attendance, check-ins, and check-outs.</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="recordAttendance()">
+            <i class="fas fa-plus"></i> Record Attendance
+        </button>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <label>Select Date</label>
+            <input type="date" id="attendanceDate" class="form-control">
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select id="statusFilter" class="form-control">
+                <option value="">All Status</option>
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+                <option value="half-day">Half Day</option>
+                <option value="leave">On Leave</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Department</label>
+            <select id="departmentFilter" class="form-control">
+                <option value="">All Departments</option>
+                <option value="HR">HR</option>
+                <option value="IT">IT</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Sales">Sales</option>
+            </select>
+        </div>
+        <button class="btn-filter" onclick="applyAttendanceFilters()">
+            <i class="fas fa-search"></i> Filter
+        </button>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="attendance-stats">
+        <div class="stat-item">
+            <div class="stat-label">Total Present</div>
+            <div class="stat-value" id="totalPresent">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Total Absent</div>
+            <div class="stat-value" id="totalAbsent">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Attendance Rate</div>
+            <div class="stat-value" id="attendanceRate">0%</div>
+        </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="table-wrapper">
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-user"></i> Employee Name</th>
+                    <th><i class="fas fa-calendar"></i> Date</th>
+                    <th><i class="fas fa-clock"></i> Check-In</th>
+                    <th><i class="fas fa-clock"></i> Check-Out</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTableBody">
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Loading attendance data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Record Attendance Modal -->
+<div id="attendanceModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAttendanceModal()">&times;</span>
+        <h2>Record Attendance</h2>
+        <form id="attendanceForm" onsubmit="saveAttendance(event)">
+            <div class="form-group">
+                <label for="employeeId">Employee</label>
+                <select id="employeeId" required>
+                    <option value="">Select Employee</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="attendanceStatus">Status</label>
+                <select id="attendanceStatus" required>
+                    <option value="">Select Status</option>
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="half-day">Half Day</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="checkInTime">Check-In Time</label>
+                <input type="time" id="checkInTime">
+            </div>
+            <div class="form-group">
+                <label for="checkOutTime">Check-Out Time</label>
+                <input type="time" id="checkOutTime">
+            </div>
+            <button type="submit" class="btn-submit">Save Attendance</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.dashboard-navbar {
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(74, 158, 255, 0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar-logo {
+    color: #4a9eff;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 0;
+}
+
+.nav-link {
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.nav-link.active {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.2);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-logout {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-logout:hover {
+    background: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.attendance-page {
+    padding: 20px;
+    color: #ffffff;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-icon {
+    font-size: 48px;
+    color: #4a9eff;
+}
+
+.header-text h1 {
+    font-size: 32px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.header-text p {
+    margin: 5px 0 0 0;
+    color: #9ca3af;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+
+.filters-section {
+    background: rgba(20, 30, 50, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #d1d5db;
+}
+
+.form-control {
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-filter {
+    background: #4a9eff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #0066cc;
+}
+
+.attendance-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: rgba(20, 30, 50, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-label {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #4a9eff;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(20, 30, 50, 0.5);
+}
+
+.attendance-table thead {
+    background: rgba(30, 40, 60, 0.8);
+    border-bottom: 2px solid rgba(74, 158, 255, 0.3);
+}
+
+.attendance-table th {
+    padding: 15px;
+    text-align: left;
+    color: #9ca3af;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.attendance-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(74, 158, 255, 0.1);
+}
+
+.attendance-table tbody tr:hover {
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-present {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.status-absent {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.status-half-day {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+}
+
+.status-leave {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+}
+
+.btn-edit:hover {
+    background: rgba(251, 146, 60, 0.4);
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.4);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #9ca3af;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+}
+
+.close {
+    color: #9ca3af;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: white;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #4a9eff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+</style>
+
+<script>
+function recordAttendance() {
+    document.getElementById("attendanceModal").style.display = "block";
+}
+
+function closeAttendanceModal() {
+    document.getElementById("attendanceModal").style.display = "none";
+}
+
+function applyAttendanceFilters() {
+    loadAttendance();
+}
+
+function saveAttendance(event) {
+    event.preventDefault();
+    alert("Save functionality to be implemented");
+    closeAttendanceModal();
+}
+
+function loadAttendance() {
+    const date = document.getElementById('attendanceDate').value || new Date().toISOString().split('T')[0];
+    
+    fetch(`/api/attendance?date=${date}`)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('attendanceTableBody');
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No attendance records found</td></tr>';
+                return;
+            }
+            
+            let presentCount = 0;
+            let absentCount = 0;
+            
+            data.forEach(record => {
+                if (record.status === 'present') presentCount++;
+                if (record.status === 'absent') absentCount++;
+                
+                const row = document.createElement('tr');
+                const checkIn = record.checkIn ? new Date(record.checkIn).toLocaleTimeString() : 'N/A';
+                const checkOut = record.checkOut ? new Date(record.checkOut).toLocaleTimeString() : 'N/A';
+                
+                row.innerHTML = `
+                    <td>${record.employeeName}</td>
+                    <td>${new Date(record.date).toLocaleDateString()}</td>
+                    <td>${checkIn}</td>
+                    <td>${checkOut}</td>
+                    <td><span class="status-badge status-${record.status}">${record.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn-action btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            const totalEmployees = data.length;
+            const attendanceRate = totalEmployees > 0 ? Math.round((presentCount / totalEmployees) * 100) : 0;
+            
+            document.getElementById('totalPresent').textContent = presentCount;
+            document.getElementById('totalAbsent').textContent = absentCount;
+            document.getElementById('attendanceRate').textContent = attendanceRate + '%';
+        })
+        .catch(error => console.error('Error loading attendance:', error));
+}
+
+window.addEventListener('load', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('attendanceDate').value = today;
+    loadAttendance();
+});
+</script>

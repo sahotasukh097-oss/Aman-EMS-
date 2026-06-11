@@ -1,0 +1,669 @@
+@{
+    ViewData["Title"] = "Leave Management - AMAN HR";
+}
+
+<!-- Navigation Bar -->
+<nav class="dashboard-navbar">
+    <div class="navbar-left">
+        <a href="/Auth/Dashboard" class="navbar-logo">
+            <i class="fas fa-circle-notch"></i> AMAN HR
+        </a>
+        <div class="navbar-links">
+            <a href="/Auth/Dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/Auth/Employees" class="nav-link">
+                <i class="fas fa-users"></i> Employees
+            </a>
+            <a href="/Auth/Attendance" class="nav-link">
+                <i class="fas fa-calendar-check"></i> Attendance
+            </a>
+            <a href="/Auth/Leaves" class="nav-link active">
+                <i class="fas fa-calendar-alt"></i> Leaves
+            </a>
+            <a href="/Auth/Payroll" class="nav-link">
+                <i class="fas fa-money-bill"></i> Payroll
+            </a>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="leaves-page">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="header-text">
+                <h1>Leave Management</h1>
+                <p>Review leave requests and manage approvals across your team.</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="applyForLeave()">
+            <i class="fas fa-plus"></i> Apply Leave
+        </button>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <label>Leave Type</label>
+            <select id="leaveTypeFilter" class="form-control">
+                <option value="">All Leave Types</option>
+                <option value="sick">Sick Leave</option>
+                <option value="casual">Casual Leave</option>
+                <option value="unpaid">Unpaid Leave</option>
+                <option value="maternity">Maternity Leave</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select id="statusFilter" class="form-control">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        <button class="btn-filter" onclick="applyLeaveFilters()">
+            <i class="fas fa-search"></i> Filter
+        </button>
+    </div>
+
+    <!-- Leaves Table -->
+    <div class="table-wrapper">
+        <table class="leaves-table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-user"></i> Employee</th>
+                    <th><i class="fas fa-leaf"></i> Leave Type</th>
+                    <th><i class="fas fa-calendar"></i> Start Date</th>
+                    <th><i class="fas fa-calendar"></i> End Date</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody id="leavesTableBody">
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Loading leave records...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Apply Leave Modal -->
+<div id="leaveModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLeaveModal()">&times;</span>
+        <h2>Apply for Leave</h2>
+        <form id="leaveForm" onsubmit="saveLeave(event)">
+            <div class="form-group">
+                <label for="leaveType">Leave Type</label>
+                <select id="leaveType" required>
+                    <option value="">Select Leave Type</option>
+                    <option value="sick">Sick Leave</option>
+                    <option value="casual">Casual Leave</option>
+                    <option value="unpaid">Unpaid Leave</option>
+                    <option value="maternity">Maternity Leave</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" required>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason</label>
+                <textarea id="reason" rows="4" placeholder="Enter reason for leave..."></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Submit Leave Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- Review Leave Modal -->
+<div id="reviewModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeReviewModal()">&times;</span>
+        <h2>Review Leave Request</h2>
+        <div id="reviewContent"></div>
+        <div class="review-actions">
+            <button class="btn-approve" onclick="approveLeave()">
+                <i class="fas fa-check"></i> Approve
+            </button>
+            <button class="btn-reject" onclick="rejectLeave()">
+                <i class="fas fa-times"></i> Reject
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-navbar {
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(74, 158, 255, 0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar-logo {
+    color: #4a9eff;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 0;
+}
+
+.nav-link {
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.nav-link.active {
+    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.2);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-logout {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-logout:hover {
+    background: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.leaves-page {
+    padding: 20px;
+    color: #ffffff;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-icon {
+    font-size: 48px;
+    color: #4a9eff;
+}
+
+.header-text h1 {
+    font-size: 32px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.header-text p {
+    margin: 5px 0 0 0;
+    color: #9ca3af;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+
+.filters-section {
+    background: rgba(20, 30, 50, 0.5);
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #d1d5db;
+}
+
+.form-control {
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-filter {
+    background: #4a9eff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #0066cc;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    border-radius: 8px;
+}
+
+.leaves-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(20, 30, 50, 0.5);
+}
+
+.leaves-table thead {
+    background: rgba(30, 40, 60, 0.8);
+    border-bottom: 2px solid rgba(74, 158, 255, 0.3);
+}
+
+.leaves-table th {
+    padding: 15px;
+    text-align: left;
+    color: #9ca3af;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.leaves-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(74, 158, 255, 0.1);
+}
+
+.leaves-table tbody tr:hover {
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-approved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.status-pending {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.btn-view {
+    background: rgba(74, 158, 255, 0.2);
+    color: #4a9eff;
+}
+
+.btn-view:hover {
+    background: rgba(74, 158, 255, 0.4);
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.4);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #9ca3af;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #9ca3af;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: white;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #4a9eff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #4a9eff 0%, #0066cc 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+}
+
+.review-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-approve {
+    flex: 1;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-approve:hover {
+    background: rgba(16, 185, 129, 0.4);
+}
+
+.btn-reject {
+    flex: 1;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-reject:hover {
+    background: rgba(239, 68, 68, 0.4);
+}
+</style>
+
+<script>
+function applyForLeave() {
+    document.getElementById("leaveModal").style.display = "block";
+}
+
+function closeLeaveModal() {
+    document.getElementById("leaveModal").style.display = "none";
+}
+
+function closeReviewModal() {
+    document.getElementById("reviewModal").style.display = "none";
+}
+
+function applyLeaveFilters() {
+    loadLeaves();
+}
+
+function saveLeave(event) {
+    event.preventDefault();
+    alert("Save functionality to be implemented");
+    closeLeaveModal();
+}
+
+function approveLeave() {
+    alert("Leave approved successfully");
+    closeReviewModal();
+    loadLeaves();
+}
+
+function rejectLeave() {
+    alert("Leave rejected successfully");
+    closeReviewModal();
+    loadLeaves();
+}
+
+function loadLeaves() {
+    fetch('/api/leaves')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('leavesTableBody');
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No leave records found</td></tr>';
+                return;
+            }
+            
+            data.forEach(leave => {
+                const row = document.createElement('tr');
+                const startDate = new Date(leave.startDate).toLocaleDateString();
+                const endDate = new Date(leave.endDate).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${leave.employeeName}</td>
+                    <td>${leave.leaveType}</td>
+                    <td>${startDate}</td>
+                    <td>${endDate}</td>
+                    <td><span class="status-badge status-${leave.status}">${leave.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-view" onclick="reviewLeave(${leave.id})"><i class="fas fa-eye"></i> Review</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error loading leaves:', error));
+}
+
+function reviewLeave(leaveId) {
+    document.getElementById("reviewModal").style.display = "block";
+}
+
+window.addEventListener('load', loadLeaves);
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const leaveModal = document.getElementById("leaveModal");
+    const reviewModal = document.getElementById("reviewModal");
+    
+    if (event.target == leaveModal) {
+        leaveModal.style.display = "none";
+    }
+    if (event.target == reviewModal) {
+        reviewModal.style.display = "none";
+    }
+}
+</script>

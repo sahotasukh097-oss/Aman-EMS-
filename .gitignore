@@ -1,0 +1,29 @@
+# Visual Studio and build output
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.sln.iml
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+
+# Visual Studio cache/options
+*.v2k
+*.v3k
+
+# Database files (optional - remove if you want to commit DB)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment-specific settings (optional)
+appsettings.Development.json
+
+# Runtime
+.env
+.env.local

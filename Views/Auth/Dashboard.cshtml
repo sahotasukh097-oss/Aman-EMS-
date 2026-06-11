@@ -1,0 +1,197 @@
+@{
+    ViewData["Title"] = "Dashboard - AMAN HR Management";
+}
+
+<!-- Navigation Bar -->
+<nav class="dashboard-navbar">
+    <div class="navbar-left">
+        <a href="/Auth/Dashboard" class="navbar-logo">
+            <i class="fas fa-circle-notch"></i> AMAN HR
+        </a>
+        <div class="navbar-links">
+            <a href="/Auth/Dashboard" class="nav-link active">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/Auth/Employees" class="nav-link">
+                <i class="fas fa-users"></i> Employees
+            </a>
+            <a href="/Auth/Attendance" class="nav-link">
+                <i class="fas fa-calendar-check"></i> Attendance
+            </a>
+            <a href="/Auth/Leaves" class="nav-link">
+                <i class="fas fa-calendar-alt"></i> Leaves
+            </a>
+            <a href="/Auth/Payroll" class="nav-link">
+                <i class="fas fa-money-bill"></i> Payroll
+            </a>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="navbar-date">
+            <i class="fas fa-calendar"></i>
+            <span id="currentDate"></span>
+        </div>
+        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="dashboard-welcome">
+        <div class="welcome-logo">
+            <img src="~/images/aman-hr-logo.svg" alt="AMAN HR Logo" class="logo-image">
+        </div>
+        <div class="welcome-content">
+            <h1>Welcome to AMAN HR Management</h1>
+            <p>Manage your workforce efficiently with powerful attendance, payroll, leave, and employee tools.</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards with Real-time Data -->
+    <div class="dashboard-stats">
+        <div class="stat-card stat-card-employees">
+            <div class="stat-info">
+                <h3>Total Employees</h3>
+                <p class="stat-number" id="totalEmployees">
+                    <span class="stat-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </p>
+                <span class="stat-label">Workforce size</span>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-present">
+            <div class="stat-info">
+                <h3>Present Today</h3>
+                <p class="stat-number" id="presentToday">
+                    <span class="stat-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </p>
+                <span class="stat-label" id="attendancePercLabel">Checked in</span>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-leaves">
+            <div class="stat-info">
+                <h3>Pending Leaves</h3>
+                <p class="stat-number" id="pendingLeaves">
+                    <span class="stat-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </p>
+                <span class="stat-label">Awaiting approval</span>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-times-circle"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card-payroll">
+            <div class="stat-info">
+                <h3>Monthly Payroll</h3>
+                <p class="stat-number stat-currency" id="monthlyPayroll">
+                    <span class="stat-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </p>
+                <span class="stat-label">Paid this month</span>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="dashboard-actions">
+        <a href="/Auth/Employees" class="action-btn action-btn-add">
+            <i class="fas fa-user-plus"></i>
+            <span>Manage Employees</span>
+        </a>
+        <a href="/Auth/Attendance" class="action-btn action-btn-attendance">
+            <i class="fas fa-calendar-check"></i>
+            <span>Attendance</span>
+        </a>
+        <a href="/Auth/Leaves" class="action-btn action-btn-leaves">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Leave Requests</span>
+        </a>
+        <a href="/Auth/Payroll" class="action-btn action-btn-payroll">
+            <i class="fas fa-money-bill"></i>
+            <span>Payroll</span>
+        </a>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="card-section">
+            <div class="section-header">
+                <i class="fas fa-history"></i>
+                <h2>Recent Activity</h2>
+            </div>
+            <div class="activity-list" id="activityList">
+                <div class="activity-skeleton"></div>
+                <div class="activity-skeleton"></div>
+                <div class="activity-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Department Distribution -->
+        <div class="card-section">
+            <div class="section-header">
+                <i class="fas fa-chart-pie"></i>
+                <h2>Department Distribution</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="dashboard-charts">
+        <!-- Attendance Trend -->
+        <div class="card-section full-width">
+            <div class="section-header">
+                <i class="fas fa-chart-line"></i>
+                <h2>Attendance Trend (Last 6 Months)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Salary Distribution -->
+        <div class="card-section full-width">
+            <div class="section-header">
+                <i class="fas fa-chart-bar"></i>
+                <h2>Salary Distribution</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="salaryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard-charts.js"></script>
+}

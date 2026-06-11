@@ -1,0 +1,186 @@
+@{
+    ViewData["Title"] = "FAQ - SAPS HR Management Software";
+}
+
+<!-- FAQ Hero Section -->
+<section class="faq-hero">
+    <div class="container-fluid">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to common questions about AMAN HR Management Software.</p>
+    </div>
+</section>
+
+<!-- FAQ Content Section -->
+<section class="faq-content">
+    <div class="container-fluid">
+        <div class="faq-container">
+            <!-- Q&A Item 1 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What is AMAN?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN is an open-source Human Resource Management (HRM) platform designed to help organizations manage their workforce efficiently. It provides comprehensive tools for employee management, attendance tracking, leave management, and payroll processing.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 2 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is AMAN really free?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, AMAN Open-Source Edition is completely free. The source code is available under the MIT license, allowing you to use, modify, and distribute it freely. We also offer AMAN Cloud for organizations preferring managed hosting, starting at $29/month.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 3 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How secure is AMAN?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN implements industry-standard security practices including encrypted passwords, role-based access control, and secure authentication. All sensitive data is encrypted both at rest and in transit. Being open-source, the code is transparent and auditable by the security community.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 4 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I customize AMAN?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Absolutely! AMAN is fully open-source, giving you complete access to the codebase. You can customize every aspect of the system to match your organization's specific requirements, from UI modifications to adding new features.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 5 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What support is available?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN has an active community forum where you can ask questions and get help from other users and developers. We also maintain comprehensive documentation and GitHub issues for bug reports and feature requests. Commercial support options are available through AMAN Cloud.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 6 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How do I migrate from another HR system?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN provides migration tools and documentation to help transfer data from other HR systems. We support importing employee data, attendance records, and other HR information. Our support team can assist with complex migrations. Contact us for specific migration assistance.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 7 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can AMAN handle multiple companies/locations?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, AMAN supports multi-company and multi-location setups. You can manage separate organizational hierarchies, payroll structures, and policies for different companies or locations within a single AMAN instance.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 8 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What languages does AMAN support?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN currently supports English. However, being open-source, the community is working on adding multi-language support. You can contribute translations or customize the language files for your organization's needs.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 9 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How often is AMAN updated?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN is actively maintained with regular updates. We release new features, bug fixes, and security patches throughout the year. The exact update schedule depends on the community contributions and development priorities. Check our GitHub repository for the latest releases.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 10 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What are the system requirements?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>AMAN requires PHP 7.4+, MySQL 5.7+, and a web server (Apache or Nginx). For development, ensure you have Git and Composer installed. See the documentation for detailed setup instructions.</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 11 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is there a trial or demo available?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes! AMAN offers a demo environment with pre-populated data including 65+ employees, complete attendance records, leave management, and payroll information. You can access it with demo credentials: admin@aman.com / try1436</p>
+                </div>
+            </div>
+
+            <!-- Q&A Item 12 -->
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How can I contribute to AMAN?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>We welcome contributions! You can contribute by reporting bugs, suggesting features, writing documentation, or submitting code. Visit our GitHub repository to get started. Please check the contributing guidelines before submitting pull requests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA Section -->
+<section class="faq-cta">
+    <div class="container-fluid">
+        <h2>Didn't find your answer?</h2>
+        <p>Contact our support team or check the documentation for more information.</p>
+        <div class="cta-buttons">
+            <a href="/Home/Contact" class="btn btn-contact">Contact Us</a>
+            <a href="#" class="btn btn-docs">Read Documentation</a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            const isOpen = faqItem.classList.contains('active');
+
+            // Close all other FAQ items
+            document.querySelectorAll('.faq-item.active').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Toggle current item
+            if (isOpen) {
+                faqItem.classList.remove('active');
+            } else {
+                faqItem.classList.add('active');
+            }
+        }
+    </script>
+}
