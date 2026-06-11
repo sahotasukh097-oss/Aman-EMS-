@@ -1,6 +1,6 @@
-using Aman_EMS_.Models;
+using SAPS_EMS_.Models;
 
-namespace Aman_EMS_.Data
+namespace SAPS_EMS_.Data
 {
     public static class SampleDataInitializer
     {

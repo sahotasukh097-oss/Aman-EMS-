@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Aman_EMS_.Models
+namespace SAPS_EMS_.Models
 {
     public class Attendance
     {

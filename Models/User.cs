@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Aman_EMS_.Models
+namespace SAPS_EMS_.Models
 {
     public class User
     {

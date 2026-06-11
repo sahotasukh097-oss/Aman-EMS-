@@ -1,10 +1,10 @@
-using Aman_EMS_.Data;
-using Aman_EMS_.Models;
+using SAPS_EMS_.Data;
+using SAPS_EMS_.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aman_EMS_.Controllers
+namespace SAPS_EMS_.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

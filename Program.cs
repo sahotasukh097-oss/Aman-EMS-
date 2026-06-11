@@ -1,4 +1,4 @@
-using Aman_EMS_.Data;
+using SAPS_EMS_.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 
 // Add Entity Framework Core with SQLite
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Data Source=aman_hrm.db";
+    ?? "Data Source=saps_hrm.db";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
@@ -45,7 +45,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
     // Delete existing database to create fresh one
-    string dbPath = "aman_hrm.db";
+    string dbPath = "saps_hrm.db";
     if (File.Exists(dbPath))
     {
         File.Delete(dbPath);

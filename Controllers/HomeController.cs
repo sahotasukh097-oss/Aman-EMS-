@@ -1,8 +1,8 @@
-using Aman_EMS_.Models;
+using SAPS_EMS_.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Aman_EMS_.Controllers
+namespace SAPS_EMS_.Controllers
 {
     public class HomeController : Controller
     {

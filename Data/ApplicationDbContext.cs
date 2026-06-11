@@ -1,7 +1,7 @@
-using Aman_EMS_.Models;
+using SAPS_EMS_.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aman_EMS_.Data
+namespace SAPS_EMS_.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -21,11 +21,11 @@ namespace Aman_EMS_.Data
             base.OnModelCreating(modelBuilder);
 
             // Configure table names
-            modelBuilder.Entity<User>().ToTable("Amanhr_users");
-            modelBuilder.Entity<Employee>().ToTable("Amanhr_employees");
-            modelBuilder.Entity<Attendance>().ToTable("Amanhr_attendance");
-            modelBuilder.Entity<Leave>().ToTable("Amanhr_leaves");
-            modelBuilder.Entity<Payroll>().ToTable("Amanhr_payroll");
+            modelBuilder.Entity<User>().ToTable("SAPShr_users");
+            modelBuilder.Entity<Employee>().ToTable("SAPShr_employees");
+            modelBuilder.Entity<Attendance>().ToTable("SAPShr_attendance");
+            modelBuilder.Entity<Leave>().ToTable("SAPShr_leaves");
+            modelBuilder.Entity<Payroll>().ToTable("SAPShr_payroll");
 
             // Configure relationships
             modelBuilder.Entity<Employee>()
